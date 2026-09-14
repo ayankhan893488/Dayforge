@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -88,8 +87,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "DayForge — Premium Attendance Tracker" },
       { name: "twitter:description", content: "Track daily work attendance with beautiful reports, streaks, earnings and offline-first sync." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ddd03b5b-2388-4200-9db7-3fd76eb1b398/id-preview-6ef74370--8ab6ffe4-252b-4695-bb05-437ab66376c9.lovable.app-1784651658975.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ddd03b5b-2388-4200-9db7-3fd76eb1b398/id-preview-6ef74370--8ab6ffe4-252b-4695-bb05-437ab66376c9.lovable.app-1784651658975.png" },
       { name: "theme-color", content: "#3a281e" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
