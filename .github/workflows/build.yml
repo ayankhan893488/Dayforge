@@ -1,0 +1,86 @@
+name: Build Dayforge APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build Web
+        shell: bash
+        run: |
+          set -e
+          npm run build
+
+          # Detect build output folder that contains index.html
+          WEB_DIR=""
+          for d in dist build out; do
+            if [ -f "$d/index.html" ]; then
+              WEB_DIR="$d"
+              break
+            fi
+          done
+
+          if [ -z "$WEB_DIR" ]; then
+            echo "ERROR: Build output index.html not found in dist/build/out."
+            echo "Searching for index.html:"
+            find . -maxdepth 4 -name index.html -print
+            exit 1
+          fi
+
+          echo "Using WEB_DIR=$WEB_DIR"
+          echo "WEB_DIR=$WEB_DIR" >> "$GITHUB_ENV"
+
+      - name: Build Android APK (Capacitor)
+        shell: bash
+        run: |
+          set -e
+
+          # Install capacitor tools if not already in your package.json
+          npm install --no-save @capacitor/cli @capacitor/core @capacitor/android
+
+          # Create a clean capacitor config (offline: no server.url)
+          cat > capacitor.config.json <<EOF
+          {
+            "appId": "com.dayforge.app",
+            "appName": "Dayforge",
+            "webDir": "${WEB_DIR}",
+            "bundledWebRuntime": false
+          }
+          EOF
+
+          rm -rf android
+          npx cap add android
+          npx cap sync android
+
+          cd android
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dayforge-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
