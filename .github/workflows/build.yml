@@ -1,4 +1,5 @@
-name: Build Dayforge APK
+
+APK
 
 on:
   push:
